@@ -1,0 +1,103 @@
+package ac.comet.cometac.checks.impl.breaking;
+
+import ac.grim.grimac.api.storage.verbose.VerboseSchema;
+import ac.comet.cometac.checks.Check;
+import ac.comet.cometac.checks.CheckData;
+import ac.comet.cometac.checks.impl.verbose.VerboseCodecs;
+import ac.comet.cometac.checks.type.BlockBreakCheck;
+import ac.comet.cometac.player.CometPlayer;
+import ac.comet.cometac.utils.anticheat.update.BlockBreak;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.manager.server.ServerVersion;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.protocol.player.DiggingAction;
+import com.github.retrooper.packetevents.protocol.world.states.WrappedBlockState;
+import com.github.retrooper.packetevents.util.Vector3i;
+
+import static ac.comet.cometac.utils.nmsutil.BlockBreakSpeed.getBlockDamage;
+
+@CheckData(name = "WrongBreak", stableKey = "cometac.breaking.wrong_break", verboseVersion = 2)
+public class WrongBreak extends Check implements BlockBreakCheck {
+    public static final VerboseSchema V = VerboseSchema.of(2,
+            "action:enum", "lastPosPresent:bool", "lastPosXZ:vl", "lastPosY:zz", "posXZ:vl", "posY:zz");
+
+    private final int exemptedY = player.getClientVersion().isOlderThan(ClientVersion.V_1_8) ? 255 : (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_14) ? -1 : 4095);
+    private boolean lastBlockWasInstantBreak = false;
+    private Vector3i lastBlock, lastCancelledBlock, lastLastBlock = null;
+
+    public WrongBreak(final CometPlayer player) {
+        super(player);
+    }
+
+    // The client sometimes sends a wierd cancel packet
+    private boolean shouldExempt(final WrappedBlockState block, int yPos) {
+        // lastLastBlock is always null when this happens, and lastBlock isn't
+        if (lastLastBlock != null || lastBlock == null)
+            return false;
+
+        // on pre 1.14.4 clients, the YPos of this packet is always the same
+        if (player.getClientVersion().isOlderThan(ClientVersion.V_1_14_4) && yPos != exemptedY)
+            return false;
+
+        // and if this block is not an instant break
+        return player.getClientVersion().isOlderThan(ClientVersion.V_1_14_4) || getBlockDamage(player, block) < 1;
+    }
+
+    @Override
+    public void onBlockBreak(BlockBreak blockBreak) {
+        if (blockBreak.action == DiggingAction.START_DIGGING) {
+            final Vector3i pos = blockBreak.position;
+
+            lastBlockWasInstantBreak = getBlockDamage(player, blockBreak.block) >= 1;
+            lastCancelledBlock = null;
+            lastLastBlock = lastBlock;
+            lastBlock = pos;
+        }
+
+        if (blockBreak.action == DiggingAction.CANCELLED_DIGGING) {
+            final Vector3i pos = blockBreak.position;
+
+            if (!shouldExempt(blockBreak.block, pos.y) && !pos.equals(lastBlock)) {
+                // https://github.com/CometAnticheat/Comet/issues/1512
+                if (player.getClientVersion().isOlderThan(ClientVersion.V_1_14_4) || (!lastBlockWasInstantBreak && pos.equals(lastCancelledBlock))) {
+                    var buf = V.write(verbose()).vi(VerboseCodecs.enumOrdinal(DiggingAction.CANCELLED_DIGGING));
+                    VerboseCodecs.nullableMcBlockPos(buf, lastBlock);
+                    VerboseCodecs.mcBlockPos(buf, pos);
+                    if (flagAndAlert(buf)) {
+                        if (shouldModifyPackets()) {
+                            blockBreak.cancel();
+                        }
+                    }
+                }
+            }
+
+            lastCancelledBlock = pos;
+            lastLastBlock = null;
+            lastBlock = null;
+            return;
+        }
+
+        if (blockBreak.action == DiggingAction.FINISHED_DIGGING) {
+            final Vector3i pos = blockBreak.position;
+
+            // when a player looks away from the mined block, they send a cancel, and if they look at it again, they don't send another start. (thanks mojang!)
+            if (!pos.equals(lastCancelledBlock) && (!lastBlockWasInstantBreak || player.getClientVersion().isOlderThan(ClientVersion.V_1_14_4)) && !pos.equals(lastBlock)) {
+                var buf = V.write(verbose()).vi(VerboseCodecs.enumOrdinal(DiggingAction.FINISHED_DIGGING));
+                VerboseCodecs.nullableMcBlockPos(buf, lastBlock);
+                VerboseCodecs.mcBlockPos(buf, pos);
+                if (flagAndAlert(buf)) {
+                    if (shouldModifyPackets()) {
+                        blockBreak.cancel();
+                    }
+                }
+            }
+
+            // 1.14.4+ clients don't send another start break in protected regions
+            if (player.getClientVersion().isOlderThan(ClientVersion.V_1_14_4)) {
+                lastCancelledBlock = null;
+                lastLastBlock = null;
+                lastBlock = null;
+            }
+        }
+    }
+}

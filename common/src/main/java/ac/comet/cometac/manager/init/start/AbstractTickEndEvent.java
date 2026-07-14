@@ -1,0 +1,30 @@
+package ac.comet.cometac.manager.init.start;
+
+import ac.comet.cometac.CometAPI;
+import ac.comet.cometac.player.CometPlayer;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.manager.server.ServerVersion;
+
+// Intended for future events we inject all platforms at the end of a tick
+public abstract class AbstractTickEndEvent implements StartableInitable {
+
+    @Override
+    public void start() {
+
+    }
+
+    protected void onEndOfTick(CometPlayer player, boolean flush) {
+        player.checkManager.getPacketEntityReplication().onEndOfTickEvent(true, flush);
+    }
+
+    protected boolean shouldInjectEndTick() {
+        boolean forceEnable = CometAPI.INSTANCE.getConfigManager().getConfig().getBooleanElse("Reach.force-enable-post-packet", false);
+        if (forceEnable) return true;
+
+        boolean enabled = CometAPI.INSTANCE.getConfigManager().getConfig().getBooleanElse("Reach.enable-post-packet", true);
+        if (!enabled) return false;
+
+        // Auto-disable on 1.8 servers unless force-enabled
+        return !PacketEvents.getAPI().getServerManager().getVersion().isOlderThanOrEquals(ServerVersion.V_1_8_8);
+    }
+}

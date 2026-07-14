@@ -1,0 +1,425 @@
+# CometAC ana konfigrasyon dosyası
+# Kaynak kodu: https://github.com/KaelusMC/CometAC
+# Telif Hakkı 2025 DefineOutside ve katkıda bulunanlar, GPLv3 altında lisanslanmıştır.
+# Değiştirilmiş ikili dosyalar veya kopyalanmış comet kodlu eklentiler özel olmalıdır,
+# veya ek ücret ödemeden alıcılara sunulan tam kaynak kodu ile.
+
+alerts:
+    # Oyunculara uyarı yayınlamanın yanı sıra, uyarılar konsola da gönderilmeli mi?
+    print-to-console: true
+    # Bu, uyarıların proxy'nize bağlı sunucular arasında paylaşılıp paylaşılmayacağını/nasıl paylaşılacağını kontrol eder.
+    # Velocity kullanılıyorsa, Velocity yapılandırmanızda 'bungee-plugin-message-channel' etkinleştirilmiş olmalıdır.
+    proxy:
+        # Proxy'nize bağlı diğer sunuculara uyarılar gönderilmeli mi?
+        send: false
+        # Diğer sunuculardan alınan uyarılar bu sunucuya duyurulmalı mı?
+        receive: false
+
+verbose:
+    print-to-console: false
+
+check-for-updates: true
+
+client-brand:
+    # Bu, giriş yapılan clientin aşağıdaki regex'lerle eşleşmesi durumunda markalarını operatörlere yayınlamayacağı anlamına gelir
+    ignored-clients:
+        - "^vanilla$"
+        - "^fabric$"
+        - "^quilt$"
+        - "^lunarclient:v\\d+\\.\\d+\\.\\d+-\\d{4},(?:fabric|forge)$"
+        - "^Feather Fabric$"
+        - "^labymod$"
+    # Comet will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
+    # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
+    disconnect-blacklisted-forge-versions: true
+
+spectators:
+    # Seyirciler aktif olarak izliyor olsalar bile, cometac.spectator iznine sahip tüm seyircileri gizle
+    hide-regardless: false
+    # Sadece bu dünyalarda seyircileri gizleyecek, tüm dünyalara izin vermek için boş bırakın
+    allowed-worlds:
+        - ""
+
+# Oyuncuların zaman aşımından dolayı sunucudan atılmadan önce ne kadar süreleri olmalı? Varsayılan = 60 saniye
+max-transaction-time: 60
+
+# Enable this to stop Comet cancelling pongs received from players.
+# This may improve compatibility with other anticheats. It may cause issues with packet limiters.
+# Do not enable this if you are not sure what you are doing.
+disable-pong-cancelling: false
+
+# Varsayılan blok yeniden senkronizasyon işleyicisi devre dışı bırakılsın mı?
+# Varsayılan olarak Comet, blokları sunucu dünyasından okur ve senkronizasyon bozukluğunu düzeltmek için istemciye gönderir.
+# Paket tabanlı sahte bloklar (sunucu dünyasında var olmayan) oluşturan eklentiler kullanıyorsanız,
+# Comet'in bunları hava/gerçek bloklarla üzerine yazmasını önlemek için bunu true olarak ayarlamalısınız.
+# Bu, API aracılığıyla özel bir tane sağlanmadıkça bir "NoOp" (İşlemsiz) işleyicisinin kullanılmasını zorlar.
+disable-default-resync-handler: false
+
+# Kopya hareket paketinin iptal edilip edilmemesi gerektiği
+# Mojang bu sorunu 1.21'de çözdü. Bu, "kova senkronizasyonu" sorununu düzeltme girişimiydi. https://bugs.mojang.com/browse/MC-12363
+# Bu ayar yalnızca 1.17-1.20.5 istemcileri için 1.8 sunucularında geçerlidir.
+cancel-duplicate-packet: true
+
+# Eşya çoğaltma paketlerindeki rotayı göz ardı edip etmeyeceğimiz
+ignore-duplicate-packet-rotation: true
+
+Simulation:
+    # Oyuncu meşru olduğunda toplam avantajı ne kadar çarpmalıyız?
+    # Varsayılan yapılandırma bu şekilde görünür (x ekseni = saniye, y ekseni = 1/1000 blok): https://www.desmos.com/calculator/d4ufgxrxer
+    setback-decay-multiplier: 0.999
+    # Oyuncunun hareketinden ne kadar büyük bir sapma ihlal oluşturmalıyız?
+    # Mümkün olan hareketten blok cinsinden ölçülür
+    # Optifine için trig tablolarını değiştirerek hesaba katıyoruz, ancak bunu 0.001'e düşürmek FastMath'ı azaltır
+    # Bu telafi işe yaramazsa anticheat'i işaretle...
+    threshold: 0.001
+    # Bir tik içinde ne kadar büyük bir ihlal olmalı ki oyuncu hemen geri dönsün?
+    # Devre dışı bırakmak için -1 yazın
+    immediate-setback-threshold: 0.1
+    # Tüm tikler boyunca ne kadar büyük bir avantaja sahip olmalıyız ki geri dönüş yapmaya başlayalım?
+    # Devre dışı bırakmak için -1 yazın
+    max-advantage: 1
+    # Varsayılan config ile 50 saniye sonra, oyuncu 4 bloktan -> 1 bloğa kadar avantaj kazanır
+    # Bu, oyuncunun çok fazla ihlal biriktirmesini ve bunların hepsini temizleyememesini önlemek içindir
+    # Varsayılan avantaj tavanı (x ekseni = saniye, y ekseni = 1/1000 blok): https://www.desmos.com/calculator/4lovswdarj
+    max-ceiling: 4
+    # Geri alma için ihlal seviyesi eşiği
+    # Eski davranış için 1
+    setback-violation-threshold: 1
+    # Max residual tolerance for firework look interpolation (blocks/tick)
+    # Increase to 0.10 if getting false positives during fast turns with fireworks
+    firework-residual-cap: 0.05
+
+# Flying prediction - validates creative/ability flying speed
+# This was previously disabled in CometAC, allowing unlimited fly speed
+FlyingPrediction:
+    # Enable flying movement prediction (validates fly speed)
+    enabled: true
+    # Extra tolerance for flying speed (blocks/tick)
+    # Increase if getting false positives with modified clients (Lunar, etc.)
+    # Default 0.05 covers float precision and minor client differences
+    tolerance: 0.05
+
+# Bir oyuncunun bir hareket sırasında bir bloğa girip girmediğini kontrol eder
+Phase:
+    setbackvl: 1 # Blokların içinde glitch yapmak duvara tırmanmaya izin verebilir, ayrıca bu kontrol nispeten stabildir
+    decay: 0.005
+
+AirLiquidPlace:
+    cancelvl: 0
+
+FabricatedPlace:
+    cancelvl: 5
+
+FarPlace:
+    cancelvl: 5
+
+PositionPlace:
+    cancelvl: 5
+
+RotationPlace:
+    cancelvl: 5
+
+# Tahmin tabanlı yavaşlama kontrolü
+# Comet burada hatalı ağ kodunu dikkate alır... sağ tıklama ve el yan tuşunu spam yapsanız bile yanlış pozitiflik oluşturması zordur
+# Diğer anti-hilelerden çok daha stabil, ancak herhangi bir yanlış pozitif rapor edin... burada birçok ağ kodu sorununu çözdüm.
+NoSlow:
+    # Ne kadar bir sapma "hile" olarak kabul edilir?
+    # Varsayılan olarak bu, diğer sapmalardan daha düşüktür
+    # NoSlow açıkken 0.03-0.2 aralığında sürekli olarak uyarı verir
+    threshold: 0.001
+    # NoSlow'un sağladığı avantajı ortadan kaldırmak için ilk itemi hızlı bir şekilde geri alın
+    setbackvl: 5
+    # Oyuncu bir eşya kullandığında VE onun tarafından yavaşlatıldığında beklenilen zaman
+    decay: 0.05
+
+Knockback:
+    # Oyuncu legit olduğunda toplam avantajı ne kadarla çarpmalıyız
+    setback-decay-multiplier: 0.999
+    # Oyuncunun hızından ne kadar büyük bir sapma ihlal oluşturmalıyız?
+    # Mümkün olan hızdan blok cinsinden ölçülür
+    threshold: 0.001
+    # Bir tik içinde ne kadar büyük bir ihlal olmalı ki oyuncu hemen geri dönsün?
+    # Devre dışı bırakmak için -1 yazın
+    immediate-setback-threshold: 0.1
+    # Tüm tikler boyunca ne kadar büyük bir avantaja sahip olmalıyız ki geri dönüş yapmaya başlayalım?
+    # Devre dışı bırakmak için -1 yazın
+    max-advantage: 1
+    # Bu, oyuncunun çok fazla ihlal toplamasını ve asla hepsini temizleyememesini engellemek içindir
+    max-ceiling: 4
+
+Explosion:
+    threshold: 0.001
+    setbackvl: 3
+
+TimerA:
+    setbackvl: 10
+    # Oyuncunun geri kaldığında biriktirebileceği milisaniye miktarı
+    # Çok yüksek ayarlandığında 1.8 hızlı kullanma/hızlı iyileşme/hızlı yay atlama durumlarına izin verebilir, 120 ms iyi bir denge gibi görünüyor
+    drift: 120
+
+# This check limits abuse of the TimerA balance by preventing the player's movement falling too far behind realtime
+TimerLimit:
+    # Kontrolün zamanlayıcı dengesini sınırlamaya başlayacağı ping değeri, kötüye kullanımı önlemek için.
+    # Bu, yalnızca bu ping eşiğini aşan meşru oyuncular için bazı geri dönüşlere neden olabilir.
+    # Devre dışı bırakmak için -1 yazın
+    ping-abuse-limit-threshold: 1000
+
+NegativeTimer:
+    # Uyarı vermeye başlamadan önce hareket halindeyken kaybedilen milisaniye sayısı
+    drift: 1200
+
+    # TimerA ile aynı kontrol yöntemi, ancak araçlar için
+VehicleTimer:
+    # Hedef 1.005 timer
+    setbackvl: 10
+
+PacketOrderI:
+    # Oyuncular 1.7 animasyon modlarını kullandıkları için işaretleniyorsa etkinleştirin
+    exempt-placing-while-digging: false
+
+Behavior:
+    d:
+        angle-threshold: 45.0
+        players-only: true
+        debug: false
+    e:
+        players-only: true
+        debug: false
+        buffer-threshold: 15
+
+Trigger:
+    a:
+        # Attack interval spread analysis
+        players-only: true
+        debug: false
+        sample-size: 10
+        max-spread: 50
+
+WallHit:
+    # Enable detection of hitting through blocks (doors, trapdoors, etc.)
+    enabled: true
+    # Only check hits against players
+    only-players: false
+    # Setback VL for hitting through blocks
+    setbackvl: 20
+    # Blocks to ignore when checking for wall hits
+    # These blocks can cause false positives due to state desync
+    ignored-blocks:
+      - "OAK_DOOR"
+      - "SPRUCE_DOOR"
+      - "BIRCH_DOOR"
+      - "JUNGLE_DOOR"
+      - "ACACIA_DOOR"
+      - "DARK_OAK_DOOR"
+      - "MANGROVE_DOOR"
+      - "CHERRY_DOOR"
+      - "BAMBOO_DOOR"
+      - "CRIMSON_DOOR"
+      - "WARPED_DOOR"
+      - "COPPER_DOOR"
+      - "EXPOSED_COPPER_DOOR"
+      - "WEATHERED_COPPER_DOOR"
+      - "OXIDIZED_COPPER_DOOR"
+      - "WAXED_COPPER_DOOR"
+      - "WAXED_EXPOSED_COPPER_DOOR"
+      - "WAXED_WEATHERED_COPPER_DOOR"
+      - "WAXED_OXIDIZED_COPPER_DOOR"
+      - "IRON_DOOR"
+      - "PALE_OAK_DOOR"
+      - "OAK_TRAPDOOR"
+      - "SPRUCE_TRAPDOOR"
+      - "BIRCH_TRAPDOOR"
+      - "JUNGLE_TRAPDOOR"
+      - "ACACIA_TRAPDOOR"
+      - "DARK_OAK_TRAPDOOR"
+      - "MANGROVE_TRAPDOOR"
+      - "CHERRY_TRAPDOOR"
+      - "BAMBOO_TRAPDOOR"
+      - "CRIMSON_TRAPDOOR"
+      - "WARPED_TRAPDOOR"
+      - "COPPER_TRAPDOOR"
+      - "EXPOSED_COPPER_TRAPDOOR"
+      - "WEATHERED_COPPER_TRAPDOOR"
+      - "OXIDIZED_COPPER_TRAPDOOR"
+      - "WAXED_COPPER_TRAPDOOR"
+      - "WAXED_EXPOSED_COPPER_TRAPDOOR"
+      - "WAXED_WEATHERED_COPPER_TRAPDOOR"
+      - "WAXED_OXIDIZED_COPPER_TRAPDOOR"
+      - "IRON_TRAPDOOR"
+      - "PALE_OAK_TRAPDOOR"
+      - "OAK_FENCE_GATE"
+      - "SPRUCE_FENCE_GATE"
+      - "BIRCH_FENCE_GATE"
+      - "JUNGLE_FENCE_GATE"
+      - "ACACIA_FENCE_GATE"
+      - "DARK_OAK_FENCE_GATE"
+      - "MANGROVE_FENCE_GATE"
+      - "CHERRY_FENCE_GATE"
+      - "BAMBOO_FENCE_GATE"
+      - "CRIMSON_FENCE_GATE"
+      - "WARPED_FENCE_GATE"
+      - "PALE_OAK_FENCE_GATE"
+      - "OAK_SLAB"
+      - "SPRUCE_SLAB"
+      - "BIRCH_SLAB"
+      - "JUNGLE_SLAB"
+      - "ACACIA_SLAB"
+      - "DARK_OAK_SLAB"
+      - "MANGROVE_SLAB"
+      - "CHERRY_SLAB"
+      - "BAMBOO_SLAB"
+      - "BAMBOO_MOSAIC_SLAB"
+      - "CRIMSON_SLAB"
+      - "WARPED_SLAB"
+      - "STONE_SLAB"
+      - "SMOOTH_STONE_SLAB"
+      - "COBBLESTONE_SLAB"
+      - "MOSSY_COBBLESTONE_SLAB"
+      - "STONE_BRICK_SLAB"
+      - "MOSSY_STONE_BRICK_SLAB"
+      - "ANDESITE_SLAB"
+      - "DIORITE_SLAB"
+      - "GRANITE_SLAB"
+      - "POLISHED_ANDESITE_SLAB"
+      - "POLISHED_DIORITE_SLAB"
+      - "POLISHED_GRANITE_SLAB"
+      - "SANDSTONE_SLAB"
+      - "RED_SANDSTONE_SLAB"
+      - "CUT_SANDSTONE_SLAB"
+      - "CUT_RED_SANDSTONE_SLAB"
+      - "SMOOTH_SANDSTONE_SLAB"
+      - "SMOOTH_RED_SANDSTONE_SLAB"
+      - "BRICK_SLAB"
+      - "NETHER_BRICK_SLAB"
+      - "RED_NETHER_BRICK_SLAB"
+      - "QUARTZ_SLAB"
+      - "SMOOTH_QUARTZ_SLAB"
+      - "PURPUR_SLAB"
+      - "PRISMARINE_SLAB"
+      - "PRISMARINE_BRICK_SLAB"
+      - "DARK_PRISMARINE_SLAB"
+      - "BLACKSTONE_SLAB"
+      - "POLISHED_BLACKSTONE_SLAB"
+      - "POLISHED_BLACKSTONE_BRICK_SLAB"
+      - "CUT_COPPER_SLAB"
+      - "EXPOSED_CUT_COPPER_SLAB"
+      - "WEATHERED_CUT_COPPER_SLAB"
+      - "OXIDIZED_CUT_COPPER_SLAB"
+      - "WAXED_CUT_COPPER_SLAB"
+      - "WAXED_EXPOSED_CUT_COPPER_SLAB"
+      - "WAXED_WEATHERED_CUT_COPPER_SLAB"
+      - "WAXED_OXIDIZED_CUT_COPPER_SLAB"
+      - "COBBLED_DEEPSLATE_SLAB"
+      - "POLISHED_DEEPSLATE_SLAB"
+      - "DEEPSLATE_BRICK_SLAB"
+      - "DEEPSLATE_TILE_SLAB"
+      - "TUFF_SLAB"
+      - "POLISHED_TUFF_SLAB"
+      - "TUFF_BRICK_SLAB"
+      - "MUD_BRICK_SLAB"
+      - "PETRIFIED_OAK_SLAB"
+      - "PALE_OAK_SLAB"
+      - "RESIN_BRICK_SLAB"
+      - "END_STONE_BRICK_SLAB"
+
+EntityPierce:
+    # Enable detection of hitting through other entities
+    enabled: true
+    # Only check hits against players
+    only-players: false
+    # Setback VL for hitting through other entities
+    setbackvl: 30
+
+Hitboxes:
+    extra-expansion: 0.01
+
+Reach:
+    # Hitbox'ları ne kadar genişletmeliyiz? 0.0005, 3.0005+ menzili tespit etmelidir
+    #
+    # 1.9-1.18.1 (1.18.2 değil) ile zorunlu olarak 0.03 genişletme vardır veya bazı istemci/sunucu kombinasyonları nedeniyle
+    # protokol değişiklikleri ve sınırlamaları nedeniyle. Bu kontrol, 1.7/1.8 istemcilerle 1.8 sunucularda en güçlüdür.
+    threshold: 0.0005
+    # Eşik üzerine eklenen ekstra menzil mesafesi (bloklar).
+    # Eşiğin aksine (hitbox'ı genişleten), bu yalnızca izin verilen menzil mesafesini genişletir,
+    # Hitboxes ışın kesişim kontrolünü etkilemez.
+    # Lag/interpolasyon nedeniyle Reach yanlış pozitifleri verir. 0.0 = varsayılan (katı).
+    extra-expansion: 0.01
+    # İmkansız olduğunu bildiğimiz vuruşları iptal etmeli miyiz?
+    # Paket sırası sınırlamaları nedeniyle 3.00-3.03 arası vuruşlar gerçekleşebilir, ancak yine de işaretlenebilir
+    block-impossible-hits: true
+    # Sends an additional packet at the end of every tick to increase the likelihood of catching cheats.
+    # Injects into server's connection list to send a final packet just before the server flushes.
+    # Increases bandwidth usage for all players but does not decrease overall server performance.
+    # Automatically disabled on 1.8 servers unless force-enable-post-packet is true.
+    # Default: true (enabled on 1.9+ servers)
+    enable-post-packet: true
+    # Force enable post-packet even on 1.8 servers where it is auto-disabled.
+    force-enable-post-packet: false
+
+exploit:
+    # Elytra ile sprint zıplarken yüksek hızlar kazanabilirsiniz, bu ayar false olarak ayarlandığında bu istismarı önler
+    # Mojang, elytra'nın istemci tarafında başlamasını ve sunucu tarafında bitmesini sağlayarak netcode'u bozdu
+    # Elytra'lar 0.99 yatay sürtünme alır, bu yüzden sürekli olarak 0.2 yatay hız eklemek çok yüksek hızlara yol açar
+    allow-sprint-jumping-when-using-elytra: true
+    # Bu seçenek, oyuncunun hayalet bloklar üzerindeki yerleşimini, gerçekleştiğinde oyuncuyu yeniden senkronize ederek hafifletir
+    allow-building-on-ghostblocks: true
+    # Bu ayar, yukarıdaki boolean ile etkilenen hayalet blokları kontrol etmek için mesafeyi tanımlar
+    # Geçerli aralığı 2 ile 4 arasında sınırlıdır
+    distance-to-check-if-ghostblocks: 2
+
+# Netty'ye enjekte olan eklentileri giriş sırasında günlüklemeyi etkinleştirerek uyumluluk sorunlarını gider
+debug-pipeline-on-join: false
+
+# Enables all experimental checks
+experimental-checks: false
+
+# Enable specific experimental checks individually when experimental-checks is false.
+# When experimental-checks is true, all experimental checks are enabled and this list is ignored.
+enabled-experimental-checks:
+#  - "AirStuck"
+#  - "ElytraL"
+#  - "ElytraM"
+#  - "InventoryF"
+#  - "InventoryG"
+
+reset-item-usage-on-item-update: true
+reset-item-usage-on-attack: true
+reset-item-usage-on-slot-change: true
+reset-item-usage-on-item-use: true
+
+# Comet bazen timer gibi yasa dışı paketleri iptal eder; bir saniyede X paket iptal edildikten sonra, ne zaman
+# oyuncuyu basitçe atmalıyız? Bu, bazı paket sınırlayıcılarının Comet tarafından iptal edilen paketleri saymaması gerektiğindendir.
+packet-spam-threshold: 100
+# Bir oyuncu packet-spam-threshold nedeniyle atıldığında stacktrace yazdırmak için bunu etkinleştirin
+debug-packet-cancel: false
+
+# Comet, uçma durumundan çıkmış bir oyuncunun X milisaniyeden fazla ping'e sahip olamayacağını uygulayabilir
+# Bu, Comet'in şu anda uçan oyuncuları kontrol etmemesindendir
+# Devre dışı bırakmak için -1 yazın
+max-ping-out-of-flying: 1000
+
+# Bir havai fişek ivmesi oyuncudan çıkarıldığında maksimum ping.
+# Bu, yüksek gecikmeli oyuncuların bir havai fişek ivmesini elytra ile sonsuza kadar kullanmalarını engeller.
+max-ping-firework-boost: 1000
+
+# Şema işaretçileri — yalnızca ne yaptığınızı biliyorsanız değiştirin.
+#   config-flavor:  V2 = Comet 2.x derlemesi, V3 = Comet 3.x. Eklenti, flavor'ı
+#                   kendi derlemesiyle uyuşmayan bir config'i yüklemeyi
+#                   reddeder; V3 config'i V2 jar ile açılırsa, yanlış
+#                   anahtarlara sessizce karışmak yerine hemen başarısız olur.
+#   config-version: her geriye dönük uyumsuz biçim değişikliğinde artırılır.
+#                   Eski config'ler bir sonraki başlatmada, pakete dahil
+#                   updater tarafından otomatik taşınır.
+# LuckPerms kurulu olsun ya da olmasın, bir oyuncu katıldığında ve Comet yeniden
+# yüklendiğinde Comet önbellekteki izinleri her zaman yeniler.
+# LuckPerms olay hook'ları normal kurulumlarda önbellekteki Comet izinlerini de
+# anında yeniler.
+# Bu periyodik yedek yalnızca bu olayların kapsamadığı çevrim içi izin
+# değişiklikleri için gereklidir; örneğin signalContextUpdate çağırmayan özel bir
+# LuckPerms context'i, Fabric context boşlukları veya LuckPerms dışında izinleri
+# canlı olarak değiştiren bir izin sağlayıcısı.
+# Yoklamayı devre dışı bırakmak için -1 kullanın. Her X tick'te yenilemek için pozitif bir değer kullanın.
+update-permission-ticks: -1
+
+config-flavor: V2
+config-version: 11

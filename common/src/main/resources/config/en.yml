@@ -1,0 +1,480 @@
+#   ____   ___   __  __  _____  _____    _     ____
+#  / ___| / _ \ |  \/  || ____||_   _|  / \   / ___|
+# | |    | | | || |\/| ||  _|    | |   / _ \ | |
+# | |___ | |_| || |  | || |___   | |  / ___ \| |___
+#  \____| \___/ |_|  |_||_____|  |_|  /_/  \_\ \____|
+#
+# C o m e t A C | J a v a
+#
+# -----------------------------------------------------------------------------
+#
+#  Developed & Managed by: SleepyDN
+#  Email: sleepyxemail@gmail.com
+#  GitHub: https://github.com/OkaySleepy
+#  CometAC GitHub: https://github.com/CometAC
+#  Discord: @OkaySleepyX
+#
+# -----------------------------------------------------------------------------
+#
+# CometAC main configuration
+# Source code: https://github.com/KaelusMC/CometAC
+# Copyright 2025 DefineOutside and contributors. Licensed under GPLv3.
+# Modified binaries, or plugins with copied CometAC code, must be private,
+# or with full source code available to buyers at no additional cost.
+
+alerts:
+    # In addition to broadcasting alerts to players, should they also be sent to the console?
+    print-to-console: true
+    # This controls whether/how alerts are shared between servers connected to your proxy.
+    # You must have 'bungee-plugin-message-channel' enabled in your Velocity's configuration if Velocity is in use.
+    proxy:
+        # Should alerts be sent to other servers connected to your proxy?
+        send: false
+        # Should the alerts received from other servers be announced to this server?
+        receive: false
+
+verbose:
+    print-to-console: false
+
+check-for-updates: true
+
+client-brand:
+    # This means it won't broadcast their brand to operators if the brand matches the following regexes
+    ignored-clients:
+        - "^vanilla$"
+        - "^fabric$"
+        - "^quilt$"
+        - "^lunarclient:v\\d+\\.\\d+\\.\\d+-\\d{4},(?:fabric|forge)$"
+        - "^Feather Fabric$"
+        - "^labymod$"
+    # Comet will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
+    # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
+    disconnect-blacklisted-forge-versions: true
+
+spectators:
+    # Hide all spectators with the cometac.spectator permission regardless if they are actually actively spectating
+    hide-regardless: false
+    # Will make spectators hidden only in these worlds, keep blank to allow all worlds
+    allowed-worlds:
+        - ""
+
+# How long should players have until we kick them for timing out? Default = 60 seconds
+max-transaction-time: 60
+
+# Enable this to stop Comet cancelling pongs received from players.
+# This may improve compatibility with other anticheats. It may cause issues with packet limiters.
+# Do not enable this if you are not sure what you are doing.
+disable-pong-cancelling: false
+
+# Should the default block resynchronization handler be disabled?
+# By default, Comet reads blocks from the server world and sends them to the client to fix desync.
+# If you use plugins that create fake packet-based blocks (which don't exist in the server world),
+# you should set this to true to prevent Comet from overwriting them with air/real blocks.
+# This forces the use of a "NoOp" (No Operation) handler unless a custom one is provided via API.
+disable-default-resync-handler: false
+
+# Should the duplicate movement packet be cancelled?
+# Mojang has fixed this issue in 1.21. This was their attempt to fix the "bucket desync". https://bugs.mojang.com/browse/MC-12363
+# This setting only applies to 1.17-1.20.5 clients on 1.8 servers.
+cancel-duplicate-packet: true
+
+# Whether or not to ignore the rotation in duplicate packets
+ignore-duplicate-packet-rotation: true
+
+Simulation:
+    # How much should we multiply total advantage by when the player is legit
+    # This is what the default config looks like (x axis = seconds, y axis = 1/1000 block): https://www.desmos.com/calculator/d4ufgxrxer
+    setback-decay-multiplier: 0.999
+    # How large of an offset from the player's movement should we create a violation for?
+    # Measured in blocks from the possible movement
+    # We account for Optifine by switching trig tables but dropping this to 0.001 will reduce FastMath
+    # flagging the anticheat if this compensation doesn't work...
+    threshold: 0.001
+    # How large of a violation in a tick before the player gets immediately setback?
+    # -1 to disable
+    immediate-setback-threshold: 0.1
+    # How large of an advantage over all ticks before we start to setback?
+    # -1 to disable
+    max-advantage: 1
+    # After 50 seconds with default config, the player will go from 4 blocks -> 1 block of advantage
+    # This is to stop the player from gathering too many violations and never being able to clear them all
+    # Default advantage ceiling (x axis = seconds, y axis = 1/1000 block): https://www.desmos.com/calculator/4lovswdarj
+    max-ceiling: 4
+    # Violation level threshold for setback
+    # 1 for old behavior
+    setback-violation-threshold: 1
+    # Max residual tolerance for firework look interpolation (blocks/tick)
+    # Increase to 0.10 if getting false positives during fast turns with fireworks
+    firework-residual-cap: 0.05
+
+# Flying prediction - validates creative/ability flying speed
+# This was previously disabled in CometAC, allowing unlimited fly speed
+FlyingPrediction:
+    # Enable flying movement prediction (validates fly speed)
+    enabled: true
+    # Extra tolerance for flying speed (blocks/tick)
+    # Increase if getting false positives with modified clients (Lunar, etc.)
+    # Default 0.05 covers float precision and minor client differences
+    tolerance: 0.05
+
+# Checks to see if a player entered a block during a movement
+Phase:
+    setbackvl: 1 # Glitching into blocks can allow wall climbing, plus this check is relatively stable
+    decay: 0.005
+
+AirLiquidPlace:
+    cancelvl: 0
+
+FabricatedPlace:
+    cancelvl: 5
+
+FarPlace:
+    cancelvl: 5
+
+PositionPlace:
+    cancelvl: 5
+
+RotationPlace:
+    cancelvl: 5
+
+# Prediction-based no slow check
+# Comet accounts for buggy netcode here... hard to false even when spamming right click and offhand button
+# Much more stable than other anticheats, but please report any falses... I have fixed a ton of netcode issues here.
+NoSlow:
+    # How much of an offset is "cheating"
+    # By default this is lower than other offs
+    # Flags by 0.03-0.2 consistently with NoSlow on
+    threshold: 0.001
+    # Setback fast on the first item to remove any advantage NoSlow gives
+    setbackvl: 5
+    # Decay's when the player uses an item AND is slowed by it
+    decay: 0.05
+
+Knockback:
+    # How much should we multiply total advantage by when the player is legit
+    setback-decay-multiplier: 0.999
+    # How large of an offset from the player's velocity should we create a violation for?
+    # Measured in blocks from the possible velocity
+    threshold: 0.001
+    # How large of a violation in a tick before the player gets immediately setback?
+    # -1 to disable
+    immediate-setback-threshold: 0.1
+    # How large of an advantage over all ticks before we start to setback?
+    # -1 to disable
+    max-advantage: 1
+    # This is to stop the player from gathering too many violations and never being able to clear them all
+    max-ceiling: 4
+
+Explosion:
+    threshold: 0.001
+    setbackvl: 3
+
+TimerA:
+    setbackvl: 10
+    # Milliseconds that the player can accumulate for later use when they fall behind
+    # Could potentially allow 1.8 fast use/fast heal/fast bow bypasses if set too high, 120 ms seems like a good balance
+    drift: 120
+
+# This check limits abuse of the TimerA balance by preventing the player's movement falling too far behind realtime
+TimerLimit:
+    # Ping at which the check will start to limit timer balance, to prevent abuse.
+    # Can cause some setbacks for legitimate players but only if they are over this ping threshold.
+    # -1 to disable
+    ping-abuse-limit-threshold: 1000
+
+NegativeTimer:
+    # Number of milliseconds lost while moving before we should start flagging
+    drift: 1200
+
+# Same check method as TimerA, but for vehicles
+VehicleTimer:
+    # Target 1.005 timer
+    setbackvl: 10
+
+PacketOrderI:
+    # enable if players are getting flagged for using 1.7 animations mods
+    exempt-placing-while-digging: false
+
+Behavior:
+    d:
+        # Minimum angle (degrees) between look direction and entity to flag as no-rotation attack
+        # 90 = flag only when clearly not looking at target
+        # 60 = stricter, catches more subtle norot
+        # 45 = very strict, may false on fast snaps
+        angle-threshold: 45.0
+        # Only check attacks against players?
+        players-only: true
+        # Debug mode: logs every attack with angle value
+        debug: false
+
+    e:
+        # Detects triggerbots that attack at perfect fall distance for critical hits
+        # Based on concept by DarknessAC (KillAura P)
+        players-only: true
+        debug: false
+        # How many consecutive identical fractional Y positions before flagging
+        # Higher = fewer false positives, lower = faster detection
+        buffer-threshold: 15
+
+Trigger:
+    a:
+        # Attack interval spread analysis
+        players-only: true
+        debug: false
+        sample-size: 10
+        max-spread: 50
+
+AirStuck:
+    # Enable AirStuck detection (teleports frozen players to ground)
+    # Disable if you don't want lagging players to be teleported
+    enabled: true
+    # Ticks without position packet before flagging (20 ticks = 1 second)
+    max-ticks: 40
+
+AutoTotem:
+    a:
+        # Maximum time (ms) between totem pop and re-equip to flag
+        # Human reaction is 200-3000ms, sub-100ms is physically impossible
+        threshold: 100
+        debug: false
+    b:
+        # Minimum samples before statistical analysis
+        min-samples: 3
+        # Maximum standard deviation (ms) of re-equip intervals to flag
+        # Bots have SD < 15ms, humans have SD > 100ms
+        max-sd: 50.0
+        # Maximum mean (ms) of re-equip intervals to flag
+        max-mean: 500
+        debug: false
+    c:
+        debug: false
+
+WallHit:
+    # Enable detection of hitting through blocks (doors, trapdoors, etc.)
+    enabled: true
+    # Only check hits against players
+    only-players: false
+    # Setback VL for hitting through blocks
+    setbackvl: 20
+    # Blocks to ignore when checking for wall hits
+    # These blocks can cause false positives due to state desync
+    ignored-blocks:
+      - "OAK_DOOR"
+      - "SPRUCE_DOOR"
+      - "BIRCH_DOOR"
+      - "JUNGLE_DOOR"
+      - "ACACIA_DOOR"
+      - "DARK_OAK_DOOR"
+      - "MANGROVE_DOOR"
+      - "CHERRY_DOOR"
+      - "BAMBOO_DOOR"
+      - "CRIMSON_DOOR"
+      - "WARPED_DOOR"
+      - "COPPER_DOOR"
+      - "EXPOSED_COPPER_DOOR"
+      - "WEATHERED_COPPER_DOOR"
+      - "OXIDIZED_COPPER_DOOR"
+      - "WAXED_COPPER_DOOR"
+      - "WAXED_EXPOSED_COPPER_DOOR"
+      - "WAXED_WEATHERED_COPPER_DOOR"
+      - "WAXED_OXIDIZED_COPPER_DOOR"
+      - "IRON_DOOR"
+      - "PALE_OAK_DOOR"
+      - "OAK_TRAPDOOR"
+      - "SPRUCE_TRAPDOOR"
+      - "BIRCH_TRAPDOOR"
+      - "JUNGLE_TRAPDOOR"
+      - "ACACIA_TRAPDOOR"
+      - "DARK_OAK_TRAPDOOR"
+      - "MANGROVE_TRAPDOOR"
+      - "CHERRY_TRAPDOOR"
+      - "BAMBOO_TRAPDOOR"
+      - "CRIMSON_TRAPDOOR"
+      - "WARPED_TRAPDOOR"
+      - "COPPER_TRAPDOOR"
+      - "EXPOSED_COPPER_TRAPDOOR"
+      - "WEATHERED_COPPER_TRAPDOOR"
+      - "OXIDIZED_COPPER_TRAPDOOR"
+      - "WAXED_COPPER_TRAPDOOR"
+      - "WAXED_EXPOSED_COPPER_TRAPDOOR"
+      - "WAXED_WEATHERED_COPPER_TRAPDOOR"
+      - "WAXED_OXIDIZED_COPPER_TRAPDOOR"
+      - "IRON_TRAPDOOR"
+      - "PALE_OAK_TRAPDOOR"
+      - "OAK_FENCE_GATE"
+      - "SPRUCE_FENCE_GATE"
+      - "BIRCH_FENCE_GATE"
+      - "JUNGLE_FENCE_GATE"
+      - "ACACIA_FENCE_GATE"
+      - "DARK_OAK_FENCE_GATE"
+      - "MANGROVE_FENCE_GATE"
+      - "CHERRY_FENCE_GATE"
+      - "BAMBOO_FENCE_GATE"
+      - "CRIMSON_FENCE_GATE"
+      - "WARPED_FENCE_GATE"
+      - "PALE_OAK_FENCE_GATE"
+      - "OAK_SLAB"
+      - "SPRUCE_SLAB"
+      - "BIRCH_SLAB"
+      - "JUNGLE_SLAB"
+      - "ACACIA_SLAB"
+      - "DARK_OAK_SLAB"
+      - "MANGROVE_SLAB"
+      - "CHERRY_SLAB"
+      - "BAMBOO_SLAB"
+      - "BAMBOO_MOSAIC_SLAB"
+      - "CRIMSON_SLAB"
+      - "WARPED_SLAB"
+      - "STONE_SLAB"
+      - "SMOOTH_STONE_SLAB"
+      - "COBBLESTONE_SLAB"
+      - "MOSSY_COBBLESTONE_SLAB"
+      - "STONE_BRICK_SLAB"
+      - "MOSSY_STONE_BRICK_SLAB"
+      - "ANDESITE_SLAB"
+      - "DIORITE_SLAB"
+      - "GRANITE_SLAB"
+      - "POLISHED_ANDESITE_SLAB"
+      - "POLISHED_DIORITE_SLAB"
+      - "POLISHED_GRANITE_SLAB"
+      - "SANDSTONE_SLAB"
+      - "RED_SANDSTONE_SLAB"
+      - "CUT_SANDSTONE_SLAB"
+      - "CUT_RED_SANDSTONE_SLAB"
+      - "SMOOTH_SANDSTONE_SLAB"
+      - "SMOOTH_RED_SANDSTONE_SLAB"
+      - "BRICK_SLAB"
+      - "NETHER_BRICK_SLAB"
+      - "RED_NETHER_BRICK_SLAB"
+      - "QUARTZ_SLAB"
+      - "SMOOTH_QUARTZ_SLAB"
+      - "PURPUR_SLAB"
+      - "PRISMARINE_SLAB"
+      - "PRISMARINE_BRICK_SLAB"
+      - "DARK_PRISMARINE_SLAB"
+      - "BLACKSTONE_SLAB"
+      - "POLISHED_BLACKSTONE_SLAB"
+      - "POLISHED_BLACKSTONE_BRICK_SLAB"
+      - "CUT_COPPER_SLAB"
+      - "EXPOSED_CUT_COPPER_SLAB"
+      - "WEATHERED_CUT_COPPER_SLAB"
+      - "OXIDIZED_CUT_COPPER_SLAB"
+      - "WAXED_CUT_COPPER_SLAB"
+      - "WAXED_EXPOSED_CUT_COPPER_SLAB"
+      - "WAXED_WEATHERED_CUT_COPPER_SLAB"
+      - "WAXED_OXIDIZED_CUT_COPPER_SLAB"
+      - "COBBLED_DEEPSLATE_SLAB"
+      - "POLISHED_DEEPSLATE_SLAB"
+      - "DEEPSLATE_BRICK_SLAB"
+      - "DEEPSLATE_TILE_SLAB"
+      - "TUFF_SLAB"
+      - "POLISHED_TUFF_SLAB"
+      - "TUFF_BRICK_SLAB"
+      - "MUD_BRICK_SLAB"
+      - "PETRIFIED_OAK_SLAB"
+      - "PALE_OAK_SLAB"
+      - "RESIN_BRICK_SLAB"
+      - "END_STONE_BRICK_SLAB"
+
+EntityPierce:
+    # Enable detection of hitting through other entities
+    enabled: true
+    # Only check hits against players
+    only-players: false
+    # Setback VL for hitting through other entities
+    setbackvl: 30
+
+Hitboxes:
+    # Extra hitbox expansion (blocks) applied on top of Reach's expansion
+    # when checking if a ray intersects the entity hitbox.
+    # Increase this if Hitboxes false-flags on your server due to interpolation desync.
+    # 0.0 = strict (original Comet behavior), 0.1 = lenient, 0.2+ = very lenient
+    extra-expansion: 0.01
+
+Reach:
+    # How much should we expand hitboxes by? 0.0005 should detect 3.0005+ reach
+    #
+    # There is 0.03 forced expansion with 1.9-1.18.1 (not 1.18.2), or some client/server combinations due to
+    # protocol changes and limitations. This check is most powerful with 1.7/1.8 clients on 1.8 servers.
+    threshold: 0.0005
+    # Extra reach distance (blocks) added on top of threshold.
+    # Unlike threshold (which expands the hitbox), this extends the allowed reach distance only,
+    # without affecting the Hitboxes ray intersection check.
+    # Increase if Reach false-flags due to lag/interpolation. 0.0 = default (strict).
+    extra-expansion: 0.01
+    # Should we cancel hits that we know are impossible?
+    # 3.00-3.03 hits may go through but still be flagged, due to packet order limitations
+    block-impossible-hits: true
+    # Sends an additional packet at the end of every tick to increase the likelihood of catching cheats.
+    # Injects into server's connection list to send a final packet just before the server flushes.
+    # Increases bandwidth usage for all players but does not decrease overall server performance.
+    # Automatically disabled on 1.8 servers unless force-enable-post-packet is true.
+    # Default: true (enabled on 1.9+ servers)
+    enable-post-packet: true
+    # Force enable post-packet even on 1.8 servers where it is auto-disabled.
+    force-enable-post-packet: false
+
+exploit:
+    # You can gain high speeds when sprint jumping with an elytra, this prevents the exploit when set to false
+    # Mojang screwed up netcode by making elytra start client sided and elytra end server sided
+    # Elytras take 0.99 horizontal friction, so constantly adding 0.2 horizontal speeds results in very high speeds.
+    allow-sprint-jumping-when-using-elytra: true
+    # This option mitigates the player's placement on ghostblocks by resynchronizing the player when it happens
+    allow-building-on-ghostblocks: true
+    # This setting, influenced by the boolean above defines the distance to check for ghost blocks
+    # Its valid range is limited from 2 to 4
+    distance-to-check-if-ghostblocks: 2
+
+# Enable logging plugins who have injected into netty on join to debug compatibility issues
+debug-pipeline-on-join: false
+
+# Enables all experimental checks
+experimental-checks: false
+
+# Enable specific experimental checks individually when experimental-checks is false.
+# When experimental-checks is true, all experimental checks are enabled and this list is ignored.
+enabled-experimental-checks:
+#  - "AirStuck"
+#  - "ElytraL"
+#  - "ElytraM"
+#  - "InventoryF"
+#  - "InventoryG"
+
+reset-item-usage-on-item-update: true
+reset-item-usage-on-attack: true
+reset-item-usage-on-slot-change: true
+reset-item-usage-on-item-use: true
+
+# Comet sometimes cancels illegal packets such as with timer, after X packets in a second cancelled, when should
+# we simply kick the player? This is required as some packet limiters don't count packets cancelled by comet.
+packet-spam-threshold: 100
+# Enable this to print a stacktrace when a player is kicked due to packet-spam-threshold
+debug-packet-cancel: false
+
+# Comet is able to enforce that a player set out of flying state cannot have more than X milliseconds of ping
+# This is due to Comet not currently checking flying players
+# To disable, use -1
+max-ping-out-of-flying: 1000
+
+# Maximum ping when a firework boost is removed from the player.
+# This prevents high latency players from being able to use 1 firework boost with an elytra forever.
+max-ping-firework-boost: 1000
+
+# Comet always refreshes cached permissions when a player joins and when Comet reloads,
+# whether or not LuckPerms is installed.
+# LuckPerms event hooks also refresh cached Comet permissions immediately in normal setups.
+# This periodic fallback is only needed for online permission changes not covered by
+# those events, such as a custom LuckPerms context that does not call signalContextUpdate,
+# Fabric context gaps, or a non-LuckPerms permission provider that changes live.
+# Set to -1 to disable polling. Set to a positive value to refresh every X ticks.
+update-permission-ticks: -1
+
+# Schema markers — touch only if you know what you're doing.
+#   config-flavor:  V2 = Comet 2.x build, V3 = Comet 3.x. The plugin refuses
+#                   to load a config whose flavor doesn't match its own
+#                   build, so a V3 config opened by a V2 jar fails fast
+#                   instead of silently flat-merging into the wrong keys.
+#   config-version: bumped on every breaking shape change. Old configs
+#                   auto-migrate up via the bundled updater on next start.
+config-flavor: V2
+config-version: 11

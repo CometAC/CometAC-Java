@@ -1,0 +1,74 @@
+package ac.comet.cometac.checks.impl.badpackets;
+
+import ac.grim.grimac.api.storage.verbose.VerboseSchema;
+import ac.comet.cometac.checks.CheckData;
+import ac.comet.cometac.checks.type.BlockPlaceCheck;
+import ac.comet.cometac.player.CometPlayer;
+import ac.comet.cometac.utils.anticheat.update.BlockBreak;
+import ac.comet.cometac.utils.anticheat.update.BlockPlace;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.manager.server.ServerVersion;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientUseItem;
+
+@CheckData(name = "BadPacketsH", stableKey = "cometac.badpackets.unexpected_sequence", verboseVersion = 1, description = "Sent unexpected sequence id", experimental = true)
+public class BadPacketsH extends BlockPlaceCheck {
+    public static final VerboseSchema V = VerboseSchema.of("expected:zz", "id:zz");
+
+    private int lastSequence;
+    private final boolean isSupportedVersion = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19) && PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_19);
+
+    public BadPacketsH(final CometPlayer player) {
+        super(player);
+    }
+
+    @Override
+    public void onPacketReceive(PacketReceiveEvent event) {
+        if (event.getPacketType() == PacketType.Play.Client.USE_ITEM
+                && shouldCancel(new WrapperPlayClientUseItem(event).getSequence())) {
+            event.setCancelled(true);
+            player.onPacketCancel();
+        }
+    }
+
+    @Override
+    public void onBlockPlace(BlockPlace place) {
+        if (shouldCancel(place.sequence) && shouldCancel()) {
+            place.resync();
+        }
+    }
+
+    @Override
+    public void onBlockBreak(BlockBreak blockBreak) {
+        switch (blockBreak.action) {
+            case START_DIGGING, FINISHED_DIGGING -> {
+                if (shouldCancel(blockBreak.sequence)) {
+                    blockBreak.cancel();
+                }
+            }
+            case CANCELLED_DIGGING -> { // other actions will be checked by BadPacketsL
+                if (blockBreak.sequence != 0 && flagSequence(0, blockBreak.sequence) && shouldModifyPackets()) {
+                    blockBreak.cancel();
+                }
+            }
+        }
+    }
+
+    public boolean shouldCancel(int sequence) {
+        int expected = lastSequence + 1;
+        lastSequence = sequence;
+        return isSupportedVersion && sequence != expected
+                && flagSequence(expected, sequence)
+                && shouldModifyPackets();
+    }
+
+    private boolean flagSequence(int expected, int sequence) {
+        return flagAndAlert(V.write(verbose()).zz(expected).zz(sequence));
+    }
+
+    public void onWorldChange() {
+        lastSequence = 0;
+    }
+}

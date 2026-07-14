@@ -1,0 +1,40 @@
+package ac.comet.cometac.checks.impl.badpackets;
+
+import ac.grim.grimac.api.storage.verbose.VerboseSchema;
+import ac.comet.cometac.checks.Check;
+import ac.comet.cometac.checks.CheckData;
+import ac.comet.cometac.checks.impl.verbose.VerboseCodecs;
+import ac.comet.cometac.checks.type.PacketCheck;
+import ac.comet.cometac.player.CometPlayer;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play.Client;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientEntityAction;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientEntityAction.Action;
+
+@CheckData(name = "BadPacketsQ", stableKey = "cometac.badpackets.invalid_horse_jump", verboseVersion = 2)
+public class BadPacketsQ extends Check implements PacketCheck {
+    public static final VerboseSchema V = VerboseSchema.of(2, "boost:zz", "action:enum", "entity:zz");
+
+    public BadPacketsQ(final CometPlayer player) {
+        super(player);
+    }
+
+    @Override
+    public void onPacketReceive(PacketReceiveEvent event) {
+        if (event.getPacketType() == Client.ENTITY_ACTION) {
+            WrapperPlayClientEntityAction wrapper = new WrapperPlayClientEntityAction(event);
+            // you are able to send negative jump boost, how and why!?
+            if (Math.abs(wrapper.getJumpBoost()) > 100
+                    || wrapper.getEntityId() != player.entityID
+                    || wrapper.getAction() != Action.START_JUMPING_WITH_HORSE && wrapper.getJumpBoost() != 0) {
+                int boost = wrapper.getJumpBoost();
+                int action = VerboseCodecs.enumOrdinal(wrapper.getAction());
+                int entity = wrapper.getEntityId();
+                if (flagAndAlert(V.write(verbose()).zz(boost).vi(action).zz(entity)) && shouldModifyPackets()) {
+                    event.setCancelled(true);
+                    player.onPacketCancel();
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,40 @@
+# For help with webhooks: https://support.discord.com/hc/en-us/articles/228383668
+
+enabled: false
+webhook: ""
+# Set to true to bypass Discord's webhook URL format validation.
+# This allows any valid HTTPS URL (useful for proxies or Matrix forwarders).
+disable-webhook-validation: false
+# Small header line above the alert; the bundled comet logo sits next to it.
+embed-author: "CometAC Alert"
+# Left accent bar. Defaults to CometAC blue.
+embed-color: "#1E90FF"
+# Optional bold title under the author line. Leave blank to hide.
+embed-title: ""
+# Use the bundled comet logo as the author/footer icon (uploaded with the alert).
+# Set false to fall back to a hosted URL instead.
+embed-use-logo: true
+embed-footer-text: "CometAC Protection"
+include-timestamp: true
+include-verbose: true
+# Replaces backticks in values (like client brands) so they don't break Discord's text formatting.
+# Set to "`" to disable this replacement.
+backtick-replacement-char: "ˋ" # Defaults to U+02CB
+# Main summary line (the embed description).
+violation-content:
+    - "**%player%** failed **%check%**"
+# Grouped detail blocks, shown as three inline fields in a row.
+embed-field-player:
+    - "Name: `%player%`"
+    - "Ping: `%ping% ms`"
+embed-field-check:
+    - "Check: `%check%`"
+    - "Violations: `%violations%`"
+embed-field-server:
+    - "TPS: `%tps%`"
+    - "Brand: `%brand%`"
+    - "Client: `%version%`"
+
+# Schema markers — see header comment in config.yml.
+config-flavor: V2
+config-version: 1
