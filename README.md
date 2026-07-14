@@ -7,23 +7,20 @@
   <p>Movement prediction, combat and world checks, latency-compensated — Bukkit/Paper/Folia and Fabric, 1.8 through 1.21+.</p>
 
   <p>
-    <a href="https://github.com/KaelusMC/CometAC/releases/latest"><img src="https://img.shields.io/github/v/release/KaelusMC/CometAC?style=for-the-badge&label=Release&color=1565c0" alt="Latest CometAC release"></a>
-    <a href="https://github.com/KaelusMC/CometAC/releases"><img src="https://img.shields.io/github/downloads/KaelusMC/CometAC/total?style=for-the-badge&label=Downloads&color=5cd6ff" alt="Total GitHub downloads"></a>
-    <a href="https://github.com/KaelusMC/CometAC/actions"><img src="https://img.shields.io/github/actions/workflow/status/KaelusMC/CometAC/build-and-publish.yml?style=for-the-badge&label=Build" alt="Build workflow status"></a>
-    <a href="https://modrinth.com/plugin/cometac"><img src="https://img.shields.io/modrinth/dt/LJNGWSvH?style=for-the-badge&label=Modrinth&color=1bd96a&logo=modrinth" alt="Modrinth downloads"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/KaelusMC/CometAC?style=for-the-badge&label=License" alt="GPL-3.0 license"></a>
+    <a href="https://github.com/CometAC/CometAC-Java/releases/latest"><img src="https://img.shields.io/github/v/release/CometAC/CometAC-Java?style=for-the-badge&label=Release&color=1565c0" alt="Latest CometAC release"></a>
+    <a href="https://github.com/CometAC/CometAC-Java/releases"><img src="https://img.shields.io/github/downloads/CometAC/CometAC-Java/total?style=for-the-badge&label=Downloads&color=5cd6ff" alt="Total GitHub downloads"></a>
+    <a href="https://modrinth.com/plugin/cometac"><img src="https://img.shields.io/badge/Modrinth-SOON-1bd96a?style=for-the-badge&logo=modrinth" alt="Modrinth (Soon)"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/CometAC/CometAC-Java?style=for-the-badge&label=License" alt="GPL-3.0 license"></a>
   </p>
 
   <p>
-    <a href="https://github.com/KaelusMC/CometAC/releases/latest"><strong>Download</strong></a>
+    <a href="https://github.com/CometAC/CometAC-Java/releases/latest"><strong>Download</strong></a>
     &nbsp;&bull;&nbsp;
     <a href="#quick-install"><strong>Install</strong></a>
     &nbsp;&bull;&nbsp;
     <a href="#features"><strong>Features</strong></a>
     &nbsp;&bull;&nbsp;
     <a href="#commands--permissions"><strong>Commands</strong></a>
-    &nbsp;&bull;&nbsp;
-    <a href="https://discord.cometac.ac"><strong>Discord</strong></a>
   </p>
 </div>
 
@@ -75,9 +72,8 @@ flowchart TB
     Flag -->|above punish threshold| Punish["Alerts, webhooks, commands"]
     Setback --> Board["Corrected player position"]
     Punish --> Staff["Staff alerts + logs"]
-```
 
-Every check runs against reconstructed, latency-compensated player state. Violations raise a per-check violation level; crossing a check's `setbackVL` triggers the shared setback utility, and crossing a configured punishment threshold runs the alert/webhook/command actions defined in `punishments.yml`.
+```
 
 ## Quick install
 
@@ -92,7 +88,7 @@ Every check runs against reconstructed, latency-compensated player state. Violat
 
 ### Install in five steps
 
-1. Download the latest [CometAC release](https://github.com/KaelusMC/CometAC/releases/latest) for your platform (Bukkit or Fabric).
+1. Download the latest [CometAC release](https://github.com/CometAC/CometAC-Java/releases/latest) for your platform (Bukkit or Fabric).
 2. Drop the jar into your server's `plugins/` folder (or `mods/` for Fabric).
 3. If you run a proxy with Geyser, install Floodgate on the backend server where CometAC runs.
 4. Start the server once to generate the config, then restart or reload after editing.
@@ -107,6 +103,7 @@ plugins/
     |-- messages/        # alert + command strings (gradient prefix lives here)
     |-- checks.yml       # per-check enable/disable + thresholds
     `-- punishments.yml  # violation thresholds -> commands
+
 ```
 
 ## Commands & permissions
@@ -133,6 +130,7 @@ The alert prefix is a dark-to-light blue `CometAC` gradient, defined in `message
 
 ```yaml
 prefix: "<gradient:#1565c0:#5cd6ff><bold>CometAC</bold></gradient> &8»"
+
 ```
 
 Prefixes and messages support both legacy `&` color codes and full [MiniMessage](https://docs.advntr.dev/minimessage/format.html) tags, so you can re-theme the whole plugin from one file.
@@ -151,15 +149,14 @@ Prefixes and messages support both legacy `&` color codes and full [MiniMessage]
 ## Compiling from source
 
 ```bash
-git clone https://github.com/KaelusMC/CometAC.git
-cd CometAC
+git clone [https://github.com/CometAC/CometAC-Java.git](https://github.com/CometAC/CometAC-Java.git)
+cd CometAC-Java
 ./gradlew build          # or: ./gradlew :bukkit:shadowJar
+
 ```
 
 Built jars land in `bukkit/build/libs/` and `fabric/build/libs/` as `cometac-<platform>-<version>.jar`.
 
 ## License
 
-Distributed under the [GPL-3.0 License](LICENSE). Copyright and license notices are preserved in the source tree; any redistributed or modified build must remain GPL-3.0 with source available.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Distributed under the [GPL-3.0 License](https://www.google.com/search?q=LICENSE). Copyright and license notices are preserved in the source tree; any redistributed or modified build must remain GPL-3.0 with source available.
